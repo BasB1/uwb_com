@@ -2,9 +2,9 @@
 <launch>
   <node pkg="uwb_com" type="uwb_node.py" name="uwb_node" output="screen">
     <param name="rate" value="10"/> 		<!--Rate at which the node will run-->
-    <param name="destination" value="28207"/> 		<!--Destination given in decimal-->
-    <param name="tx_topic" value="uwb_server_tx"/>	<!--Receiving topic (publisher)-->
-    <param name="rx_topic" value="/odom"/>		<!--Sending topic (subscriber)-->
-    <param name="protocol" value="precise"/>		<!--Either 'fast' or 'precise'-->
+    <param name="destination" value="28207"/> 	<!--Destination given in decimal-->
+    <param name="tx_topic" value="/odom"/>	<!--Sending topic-->
+    <param name="rx_topic" value="uwb_rx"/>	<!--Receiving topic-->
+    <param name="protocol" value="precise"/>	<!--Either 'fast' or 'precise'-->
   </node>
 </launch>
