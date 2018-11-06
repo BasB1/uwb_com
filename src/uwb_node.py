@@ -22,24 +22,18 @@ class Communicate(object):
         
     def txData(self):
         x = {
-           "p":  #pose
-                {"px": round(self.odom_data.pose.pose.position.x, 3), #position
-                "py": round(self.odom_data.pose.pose.position.y, 3),
-                "pz": round(self.odom_data.pose.pose.position.z, 3),
-                "ox": round(self.odom_data.pose.pose.orientation.x, 3), #orientation
-                "oy": round(self.odom_data.pose.pose.orientation.y, 3),
-                "oz": round(self.odom_data.pose.pose.orientation.z, 3),
-                "ow": round(self.odom_data.pose.pose.orientation.w, 3)},
-            "t":  #twist
-                {"lx": round(self.odom_data.twist.twist.linear.x, 3), #linear
-                "ly": round(self.odom_data.twist.twist.linear.y, 3),
-                "lz": round(self.odom_data.twist.twist.linear.z, 3),
-                "ax": round(self.odom_data.twist.twist.angular.x, 3), #angulaer
-                "ay": round(self.odom_data.twist.twist.angular.y, 3),
-                "az": round(self.odom_data.twist.twist.angular.z, 3)}
+                "a": self.odom_data.header.frame_id, #frame id
+                "b": self.odom_data.child_frame_id, #child frame id
+                "c": round(self.odom_data.pose.pose.position.x, 4),
+                "d": round(self.odom_data.pose.pose.position.y, 4),
+                "e": round(self.odom_data.pose.pose.orientation.z, 4), 
+                "f": round(self.odom_data.pose.pose.orientation.w, 4),
+                "g": round(self.odom_data.twist.twist.linear.x, 4),
+                "h": round(self.odom_data.twist.twist.angular.z, 4)
             }
         s = json.dumps(x)
         comp_data = zlib.compress(str(s))
+        rospy.loginfo(len(comp_data))
         data = Data([ord(c) for c in comp_data])
         self.pozyx.sendData(self.destination, data)
                 
@@ -57,20 +51,16 @@ class Communicate(object):
         
         odom_data_pub = Odometry()
         
-        odom_data_pub.pose.pose.position.x = y['p']['px']
-        odom_data_pub.pose.pose.position.y = y['p']['py']
-        odom_data_pub.pose.pose.position.z = y['p']['pz']
-        odom_data_pub.pose.pose.orientation.x = y['p']['ox']
-        odom_data_pub.pose.pose.orientation.y = y['p']['oy']
-        odom_data_pub.pose.pose.orientation.z = y['p']['oz']
-        odom_data_pub.pose.pose.orientation.w = y['p']['ow']
+        odom_data_pub.header.frame_id = y['a']
+        odom_data_pub.child_frame_id = y['b']
+        
+        odom_data_pub.pose.pose.position.x = y['c']
+        odom_data_pub.pose.pose.position.y = y['d']
+        odom_data_pub.pose.pose.orientation.z = y['e']
+        odom_data_pub.pose.pose.orientation.w = y['f']
 
-        odom_data_pub.twist.twist.linear.x = y['t']['lx']
-        odom_data_pub.twist.twist.linear.y = y['t']['ly']
-        odom_data_pub.twist.twist.linear.z = y['t']['lz']
-        odom_data_pub.twist.twist.angular.x = y['t']['ax']
-        odom_data_pub.twist.twist.angular.y = y['t']['ay']
-        odom_data_pub.twist.twist.angular.z = y['t']['az']
+        odom_data_pub.twist.twist.linear.x = y['g']
+        odom_data_pub.twist.twist.angular.z = y['h']
         
         return odom_data_pub
 
@@ -88,8 +78,6 @@ if __name__ == "__main__":
     serial_port = str(rospy.get_param('~serial_port', pzx.get_first_pozyx_serial_port()))
     frequency = float(rospy.get_param('~frequency', 10))
     rate = rospy.Rate(frequency)
-    
-    robot_number = rospy.get_param('~robot_number')
     
     protocol = str(rospy.get_param('~protocol', 'precise')) 
     
@@ -110,7 +98,7 @@ if __name__ == "__main__":
     
     pub = rospy.Publisher(rx_topic, Odometry, queue_size = 10)
     com = Communicate(pozyx, destination)
-    rospy.subscriber(tx_topic, Odometry, com.odomData)
+    rospy.Subscriber(tx_topic, Odometry, com.odomData)
     
     while not rospy.is_shutdown():
         main()         
